@@ -1,323 +1,131 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>I, Me &amp; Mine · 我与我 — 01-07 网页试玩</title>
-<link rel="shortcut icon" href="TemplateData/favicon.ico">
-<style>
-  :root{
-    --ink:#0b1417; --ink2:#101d21; --panel:#132228; --edge:#1f3a3e;
-    --verd:#5fae97; --verd-dim:#3b6f63; --amber:#e3c584; --amber-dim:#9a7f4e;
-    --paper:#e8e2d2; --muted:#8fa39d;
-  }
-  *{box-sizing:border-box; margin:0; padding:0}
-  html{scroll-behavior:smooth}
-  body{
-    background:
-      radial-gradient(1200px 500px at 50% -10%, rgba(95,174,151,.12), transparent 60%),
-      radial-gradient(800px 400px at 85% 110%, rgba(227,197,132,.07), transparent 60%),
-      var(--ink);
-    color:var(--paper);
-    font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",system-ui,sans-serif;
-    line-height:1.6; min-height:100vh;
-  }
-  a{color:var(--verd); text-decoration:none}
-  a:hover{color:var(--amber)}
-
-  /* ---------- header ---------- */
-  header{
-    position:sticky; top:0; z-index:50;
-    display:flex; align-items:center; gap:18px;
-    padding:12px 28px;
-    background:rgba(11,20,23,.85); backdrop-filter:blur(8px);
-    border-bottom:1px solid var(--edge);
-  }
-  .logo{display:flex; align-items:baseline; gap:10px; flex:none}
-  .logo .mark{
-    width:14px; height:14px; border-radius:3px;
-    background:linear-gradient(135deg,var(--verd),var(--verd-dim));
-    box-shadow:0 0 12px rgba(95,174,151,.55); transform:translateY(1px);
-  }
-  .logo b{font-size:18px; letter-spacing:.04em; font-weight:700}
-  .logo span{color:var(--muted); font-size:13px}
-  nav{display:flex; gap:4px; margin-left:auto}
-  nav a{
-    padding:6px 14px; border-radius:8px; font-size:14px; color:var(--paper);
-  }
-  nav a:hover{background:var(--panel)}
-  .btn{
-    display:inline-flex; align-items:center; gap:7px;
-    padding:7px 16px; border-radius:8px; border:1px solid var(--edge);
-    background:var(--panel); color:var(--amber); font-size:14px;
-    cursor:pointer; transition:.15s;
-  }
-  .btn:hover{border-color:var(--verd); box-shadow:0 0 10px rgba(95,174,151,.25)}
-  .btn.primary{background:linear-gradient(135deg,var(--verd),var(--verd-dim));
-    color:#06201a; border:none; font-weight:700}
-
-  main{max-width:1180px; margin:0 auto; padding:26px 22px 60px}
-
-  /* ---------- hero ---------- */
-  .hero{padding:26px 0 20px; text-align:center}
-  .hero h1{font-size:30px; font-weight:800; letter-spacing:.05em}
-  .hero h1 em{color:var(--verd); font-style:normal}
-  .hero p{color:var(--muted); margin-top:8px; font-size:15px}
-  .hero .tags{margin-top:12px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap}
-  .tag{
-    font-size:12.5px; color:var(--verd); border:1px solid var(--edge);
-    padding:3px 11px; border-radius:999px; background:rgba(95,174,151,.06);
-  }
-
-  /* ---------- stage ---------- */
-  .stage{
-    margin-top:20px; border:1px solid var(--edge); border-radius:14px;
-    overflow:hidden; background:#000; position:relative;
-    box-shadow:0 18px 50px rgba(0,0,0,.5), 0 0 0 1px rgba(95,174,151,.06);
-  }
-  .stage-inner{position:relative; width:100%; aspect-ratio:16/9}
-  canvas#unity-canvas{width:100%; height:100%; display:block; background:#0a0f11}
-  #loading{
-    position:absolute; inset:0; z-index:5;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    background:radial-gradient(600px 300px at 50% 40%, rgba(95,174,151,.10), transparent 70%), #0a0f11;
-    transition:opacity .5s;
-  }
-  #loading.done{opacity:0; pointer-events:none}
-  .load-mark{
-    width:56px; height:56px; border-radius:14px; margin-bottom:22px;
-    background:linear-gradient(135deg,var(--verd),var(--verd-dim));
-    box-shadow:0 0 30px rgba(95,174,151,.5);
-    animation:pulse 1.6s ease-in-out infinite;
-  }
-  @keyframes pulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.08);opacity:1}}
-  #load-title{font-size:17px; letter-spacing:.2em; color:var(--paper)}
-  #load-pct{font-size:13px; color:var(--verd); margin:6px 0 14px; font-variant-numeric:tabular-nums}
-  .bar{width:min(420px,70%); height:6px; border-radius:3px; background:#1c2e31; overflow:hidden}
-  .bar i{display:block; height:100%; width:0;
-    background:linear-gradient(90deg,var(--verd-dim),var(--verd),var(--amber));
-    border-radius:3px; transition:width .25s}
-  #load-tip{margin-top:16px; font-size:13px; color:var(--muted); min-height:20px}
-  .stage-foot{
-    display:flex; align-items:center; gap:14px;
-    padding:9px 16px; background:var(--ink2); border-top:1px solid var(--edge);
-    font-size:12.5px; color:var(--muted);
-  }
-  .stage-foot .dot{width:8px;height:8px;border-radius:50%;background:var(--verd);
-    box-shadow:0 0 8px rgba(95,174,151,.7)}
-  .stage-foot .right{margin-left:auto; display:flex; gap:10px; align-items:center}
-  #unity-warning div{background:#5a3216; color:#ffd; padding:6px 12px; font-size:13px}
-
-  /* ---------- cards ---------- */
-  .grid{margin-top:26px; display:grid; gap:18px;
-    grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
-  .card{
-    background:var(--panel); border:1px solid var(--edge); border-radius:14px;
-    padding:20px 22px;
-  }
-  .card h2{
-    font-size:16px; letter-spacing:.08em; margin-bottom:12px;
-    display:flex; align-items:center; gap:9px;
-  }
-  .card h2::before{content:""; width:10px; height:10px; border-radius:2px;
-    background:var(--amber); box-shadow:0 0 8px rgba(227,197,132,.6)}
-  .card p, .card li{font-size:14px; color:#c9c4b4}
-  .card ul{list-style:none}
-  .card li{padding:4px 0 4px 20px; position:relative}
-  .card li::before{content:"›"; position:absolute; left:4px; color:var(--verd)}
-
-  .keys{display:grid; grid-template-columns:auto 1fr; gap:7px 16px; font-size:14px}
-  .keys kbd{
-    justify-self:start; min-width:52px; text-align:center;
-    padding:2px 10px; border-radius:6px; font-size:12.5px;
-    background:#0d191c; border:1px solid var(--edge); border-bottom-width:2px;
-    color:var(--amber); font-family:ui-monospace,Consolas,monospace;
-  }
-  .keys span{color:#c9c4b4}
-
-  .levels{list-style:none}
-  .levels li{
-    display:flex; gap:12px; align-items:baseline; padding:8px 0;
-    border-bottom:1px dashed #1d3235;
-  }
-  .levels li:last-child{border-bottom:none}
-  .levels .num{
-    flex:none; width:30px; height:30px; border-radius:8px;
-    display:flex; align-items:center; justify-content:center;
-    background:#0d191c; border:1px solid var(--edge);
-    color:var(--verd); font-weight:700; font-size:13px;
-  }
-  .levels .t b{font-size:14.5px; font-weight:600}
-  .levels .t div{font-size:12.5px; color:var(--muted)}
-
-  footer{
-    margin-top:34px; padding:18px 0 6px; text-align:center;
-    color:var(--muted); font-size:12.5px; border-top:1px solid var(--edge);
-  }
-  .mobile-note{display:none; margin-top:14px; padding:10px 14px; border-radius:10px;
-    background:#3d2a10; color:#ffd98a; font-size:13px; text-align:center}
-  @media (max-width:720px){
-    header{flex-wrap:wrap; gap:8px; padding:10px 16px}
-    nav{order:3; width:100%; margin:0}
-    .hero h1{font-size:23px}
-    .mobile-note{display:block}
-  }
-</style>
-</head>
-<body>
-
-<header>
-  <div class="logo"><span class="mark"></span><b>I, Me &amp; Mine</b><span>我与我 · 网页试玩</span></div>
-  <nav>
-    <a href="#play">开始</a>
-    <a href="#how">玩法</a>
-    <a href="#keys">操作</a>
-    <a href="#levels">关卡</a>
-  </nav>
-  <button class="btn" id="fs-btn" onclick="goFullscreen()">⛶ 全屏</button>
-</header>
-
-<main>
-  <section class="hero">
-    <h1>在时间的回声中，<em>与过去的自己</em>同行</h1>
-    <p>2.5D 循环解谜 · 每一轮的你都会化作“回声”，复演上一轮的全部动作</p>
-    <div class="tags">
-      <span class="tag">时间循环</span><span class="tag">回声协作</span>
-      <span class="tag">6 关连玩</span><span class="tag">自由选关</span>
-    </div>
-    <div class="mobile-note">⚠ 本作使用键盘操作，建议用桌面浏览器游玩</div>
-  </section>
-
-  <section class="stage" id="play">
-    <div class="stage-inner">
-      <canvas id="unity-canvas" tabindex="-1"></canvas>
-      <div id="loading">
-        <div class="load-mark"></div>
-        <div id="load-title">正 在 唤 醒 回 声</div>
-        <div id="load-pct">0%</div>
-        <div class="bar"><i id="load-fill"></i></div>
-        <div id="load-tip"></div>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | UnityProject</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width=960 height=540 tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"> </div>
+      <div id="unity-footer">
+        <div id="unity-webgl-logo"></div>
+        <div id="unity-fullscreen-button"></div>
+        <div id="unity-build-title">UnityProject</div>
       </div>
     </div>
-    <div id="unity-warning"></div>
-    <div class="stage-foot">
-      <span class="dot"></span>
-      <span>Unity WebGL · 加载完成后点 <b style="color:var(--amber)">NEW GAME</b> 开始，或 <b style="color:var(--amber)">LEVELS</b> 任意选关</span>
-      <span class="right"><a href="#keys">键位说明</a></span>
-    </div>
-  </section>
+    <script>
 
-  <section class="grid" id="how">
-    <div class="card">
-      <h2>玩法简介</h2>
-      <p>八分钟的空中遗迹之旅：你解不开的谜题，交给<b style="color:var(--amber)">上一轮的“我”</b>。
-        按下 <b>R</b> 升华后，本体会化作一具回声，从起点忠实重演你刚刚做过的每个动作——
-        拉杆、等待、踩上机关。你需要先在脑子里“排练”回声的任务，再开始新的一段人生。</p>
-      <ul>
-        <li>死亡不惩罚：留下的躯体可以被踩、被搬、被当作重量</li>
-        <li>顺序解题：先让回声完成机关，再让真人走出口</li>
-        <li>通关自动进入下一关；LEVELS 目录页可随时选关</li>
-      </ul>
-    </div>
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+      var warningBanner = document.querySelector("#unity-warning");
 
-    <div class="card" id="keys">
-      <h2>操作说明</h2>
-      <div class="keys">
-        <kbd>A / D</kbd><span>左右移动（也可用 ← → 方向键）</span>
-        <kbd>W / S</kbd><span>前后移动（2.5D 纵深）</span>
-        <kbd>Space</kbd><span>跳跃（负重会跳得更近）</span>
-        <kbd>E</kbd><span>交互：拉杆、开关、搬运</span>
-        <kbd>R</kbd><span>升华：留下回声并开启新一轮</span>
-        <kbd>F9</kbd><span>清空重来本关</span>
-      </div>
-    </div>
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
 
-    <div class="card" id="levels">
-      <h2>关卡目录</h2>
-      <ul class="levels">
-        <li><span class="num">01</span><div class="t"><b>浮空遗迹 · 序</b><div>从废墟中醒来，熟悉这片天空</div></div></li>
-        <li><span class="num">02</span><div class="t"><b>教学关</b><div>跳跃·交互·搬运·升华·死亡——六课连成</div></div></li>
-        <li><span class="num">04</span><div class="t"><b>视线之外</b><div>骗过巡逻镜头的注视，从盲区穿过</div></div></li>
-        <li><span class="num">05</span><div class="t"><b>幽灵电梯</b><div>上一轮的幽魂，替这一轮的你拉动电梯</div></div></li>
-        <li><span class="num">06</span><div class="t"><b>悬庭回声</b><div>幽魂拉起电梯，这一轮的我们登上门廊</div></div></li>
-        <li><span class="num">07</span><div class="t"><b>错层回声</b><div>断电录下的动作，随电梯逐层重演</div></div></li>
-      </ul>
-    </div>
-  </section>
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/7a2dbded24d57e056180125b1583e7c4.loader.js";
+      var config = {
+        dataUrl: buildUrl + "/a643dc41361047bf8ed195d720008c73.data",
+        frameworkUrl: buildUrl + "/b5aecf80ecf7c820f64a3feb5b9635a4.framework.js",
+        codeUrl: buildUrl + "/abe06a1743ebad87be28e9bc2b3a013e.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "UnityProject",
+        productVersion: "1.0",
+        showBanner: unityShowBanner,
+      };
 
-  <footer>
-    I, Me &amp; Mine — 2.5D narrative puzzle · Unity WebGL 构建 ·
-    桌面浏览器体验最佳（Chrome / Edge / Firefox）
-  </footer>
-</main>
+      // By default, Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
 
-<script>
-  var canvas = document.querySelector("#unity-canvas");
-  var loading = document.getElementById("loading");
-  var loadFill = document.getElementById("load-fill");
-  var loadPct = document.getElementById("load-pct");
-  var loadTip = document.getElementById("load-tip");
-  var warningBanner = document.getElementById("unity-warning");
-  var unityInstance = null;
+      // If you would like all file writes inside Unity Application.persistentDataPath
+      // directory to automatically persist so that the contents are remembered when
+      // the user revisits the site the next time, uncomment the following line:
+      // config.autoSyncPersistentDataPath = true;
+      // This autosyncing is currently not the default behavior to avoid regressing
+      // existing user projects that might rely on the earlier manual
+      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
+      // expected to change.
 
-  var tips = [
-    "回声会复演你上一轮做过的全部动作",
-    "拉杆之后先站上电梯，再把剩下的交给过去的我",
-    "死掉的我不会消失——它能被踩、被搬、被当作重量",
-    "主菜单 LEVELS 页面可以任意选关",
-    "先在脑子里排练回声的任务，再按 R 升华"
-  ];
-  var tipIdx = 0;
-  loadTip.textContent = "小提示 · " + tips[0];
-  var tipTimer = setInterval(function(){
-    tipIdx = (tipIdx + 1) % tips.length;
-    loadTip.textContent = "小提示 · " + tips[tipIdx];
-  }, 3200);
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
 
-  function unityShowBanner(msg, type){
-    var div = document.createElement("div");
-    div.innerHTML = msg;
-    warningBanner.appendChild(div);
-    if (type != "error") setTimeout(function(){
-      if (div.parentNode) div.parentNode.removeChild(div);
-    }, 6000);
-  }
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        container.className = "unity-mobile";
+        canvas.className = "unity-mobile";
 
-  function goFullscreen(){
-    if (unityInstance) unityInstance.SetFullscreen(1);
-  }
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
 
-  var buildUrl = "Build";
-  var config = {
-    dataUrl: buildUrl + "/WebGL.data",
-    frameworkUrl: buildUrl + "/WebGL.framework.js",
-    codeUrl: buildUrl + "/WebGL.wasm",
-    streamingAssetsUrl: "StreamingAssets",
-    companyName: "IMeAndMine",
-    productName: "I, Me & Mine",
-    productVersion: "web-1.0",
-    showBanner: unityShowBanner,
-  };
 
-  var script = document.createElement("script");
-  script.src = buildUrl + "/WebGL.loader.js";
-  script.onload = function(){
-    createUnityInstance(canvas, config, function(progress){
-      var pct = Math.round(progress * 100);
-      loadFill.style.width = pct + "%";
-      loadPct.textContent = pct + "%";
-    }).then(function(instance){
-      unityInstance = instance;
-      clearInterval(tipTimer);
-      loading.classList.add("done");
-    }).catch(function(message){
-      alert(message);
-    });
-  };
-  script.onerror = function(){
-    loadTip.textContent = "加载器缺失：请确认 Build/ 目录已完整部署";
-  };
-  document.body.appendChild(script);
-</script>
-</body>
+      } else {
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+
+        canvas.style.width = "960px";
+        canvas.style.height = "540px";
+      }
+
+      loadingBar.style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+              }).then((unityInstance) => {
+                loadingBar.style.display = "none";
+                fullscreenButton.onclick = () => {
+                  unityInstance.SetFullscreen(1);
+                };
+              }).catch((message) => {
+                alert(message);
+              });
+            };
+
+      document.body.appendChild(script);
+
+    </script>
+  </body>
 </html>
